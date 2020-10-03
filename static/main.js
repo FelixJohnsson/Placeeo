@@ -36,6 +36,7 @@ function outputMap(lat, lng) {
     map.on('zoom', () => {
         let list = document.getElementsByClassName('map-markers')
         for (let item of list) {
+            
             let zoom = map.getZoom();
             let size = zoom * 6 + 'px'; 
             item.style.width = size;
@@ -112,41 +113,53 @@ function getUserImages() {
 
 
 function addMarkers() {
-    geojson.features.forEach(function (marker) {
+    geojson.features.forEach((marker) => {
         const el = document.createElement('div');
         el.className = 'map-markers'
         el.style.backgroundImage =
             `url(${marker.properties.img})`
         let location = marker.properties.location;
         let open = false;
+        let zoom = map.getZoom();
         el.addEventListener('click', () => {
             if (!open) {
-                el.style.width = '240px';
-                el.style.height = '260px';
-                el.style.backgroundSize = '240px 260px'
+                let size = zoom * 16 + 'px'; 
+                el.style.width = size;
+                el.style.height = size;
+                el.style.backgroundSize = `${size} ${size}`
                 el.style.zIndex = '1000';
                 el.style.opacity = '100%';
+                el.style.borderRadius = '0%';
                 open = true;
             } else if (open) {
-                el.style.width = '140px';
-                el.style.height = '160px';
-                el.style.backgroundSize = '140px 160px'
+                let size = zoom * 6 + 'px'; 
+                el.style.width = size;
+                el.style.height = size;
+                el.style.backgroundSize = `${size} ${size}`
                 el.style.zIndex = '1'
                 el.style.opacity = '70%';
+                el.style.borderRadius = '50%';
                 open = false;
             }
-
-
+            el.on('dragend', () => {
+                console.log('DRAGGING')
+            })
         });
-
+        let allMapMarkers = []
         // add marker to map
-        new mapboxgl.Marker(el)
+        allMapMarkers.push(new mapboxgl.Marker(el, {
+            draggable: true
+        })
             .setLngLat(location)
             .setPopup(new mapboxgl.Popup({
                     offset: 25
                 }) // add popups
-                .setHTML('<p>' + marker.properties.message + '</p><p>' + 'Yes' + '</p>'))
-            .addTo(map)
+            .setHTML('<p>' + marker.properties.message + '</p><p>' + 'Yes' + '</p>'))
+            .addTo(map));
+            allMapMarkers[0].on('dragend', (el) => {
+                console.log(el.target._lngLat)
+            })
+
     });
 }
 
