@@ -20,13 +20,15 @@ app.use(fileUpload({
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname + '/static/index.html'))
 })
+app.get('/:dir', (req, res) => {
+  res.sendFile(path.join(__dirname + '/static/index.html'))
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
 let username;
 let imageData;
-let fileData;
 app.post('/imageData', function (req, res) {
   imageData = req.body;
   console.log(imageData)
@@ -40,6 +42,8 @@ app.post('/imageData', function (req, res) {
 
 let newImageName;
 app.post('/image-upload', (req, res) => {
+  console.log(req.files)
+  let backURL = req.header('Referer')
   console.log(imageData)
   newImageName = req.files.file.name;
   
@@ -74,7 +78,7 @@ users.forEach(el => {
   }
 })
 
-  res.redirect('/home');
+  res.redirect(backURL);
 });
 
 function handleFolders(username) {
@@ -95,6 +99,7 @@ function writeFile(fileDir, data) {
     return true;
   });
 }
+
 
 app.get('/images/:username/', (req, res) => {
 
@@ -131,5 +136,5 @@ app.get('/move/:username/:id/:newCoordinates', (req, res) => {
       })
     }
   })
-  res.send('Yay')
+  res.sendStatus(200)
 })

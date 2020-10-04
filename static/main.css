@@ -14,7 +14,7 @@ body {
 
 #map {
     height: 98vh;
-    width: 99vw;
+    width: 98vw;
     position: absolute;
     top:10px;
     z-index: -2;
@@ -25,7 +25,7 @@ body {
     position: absolute;
     top:0px;
     left: 0px;
-    width: 100vw;
+    width: 97vw;
     padding: 20px;
 }
 .mapboxgl-popup-content {
@@ -38,14 +38,11 @@ body {
 
 .map-markers{
     opacity:80%;
-    background-size: 78px 78px;
     background-repeat: no-repeat;
     background-position: center;
     background-color: white;
     border: solid rgb(175, 133, 133) 3px;
     border-radius: 50%;
-    width: 78px;
-    height: 78px;
     cursor: pointer;
     position: absolute;
     z-index: 999;
@@ -56,3 +53,8 @@ body {
     cursor: pointer;
 }
 
+#image-preview{
+    position: absolute;
+    top: 40px;
+    left: 400px;
+}

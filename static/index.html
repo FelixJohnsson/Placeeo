@@ -11,8 +11,8 @@
 
 <body>
   <div id="control-panel">
-    <p>You're logged in as: <i id="userID">Felix</i></p>
-    <form action="/image-upload" method="post" enctype="multipart/form-data">
+    <p>Selected Dir: <input id="dir" placeholder="Dir name" type="text">
+      <button onclick="redirectDir()">Find</button>
       <div>
         <label for="file">Choose file to upload</label>
         <input type="file" id="file" name="file" multiple id="file">
@@ -20,8 +20,7 @@
       <div>
         <button onclick="postData()">Submit</button>
       </div>
-    </form>
-    <hr>
+    <img id="image-preview">
     <input id="title" placeholder="Title" type="text">
     <input id="description" placeholder="Description" type="text">
   </div>

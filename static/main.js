@@ -12,14 +12,18 @@ function error(err) {
 navigator.geolocation.getCurrentPosition((position) => {
     outputMap(position.coords.latitude, position.coords.longitude);
 });
+
+function redirectDir(){
+    window.location.href = "http://localhost:3000/" + document.getElementById('dir').value;
+}
 data = {
     location: [],
     time: 0,
     date: 0,
-    user: 'Felix',
+    user: 'guest',
     id: 0,
     title: 0,
-    description: 0
+    description: 0,
 }
 
 function outputMap(lat, lng) {
@@ -29,12 +33,11 @@ function outputMap(lat, lng) {
     mapboxgl.accessToken = 'pk.eyJ1IjoiZmVsaXhqb2huc3NvbiIsImEiOiJjanh0ZHIwd3kwcjhjM2Rvb2M3ZnVyMW5kIn0.Mdf_WJH-4npMZh3HNu-6wQ';
     map = new mapboxgl.Map({
         container: 'map', // container id
-        style: 'mapbox://styles/felixjohnsson/ckfsch6tp0kak1apkuo2h5vh9', // stylesheet location
+        style: 'mapbox://styles/felixjohnsson/ckfvgqi3z0xgv19oalq5pqtjb', // stylesheet location
         center: atLocation, // starting position [lng, lat]
         pitch: 60, // pitch in degrees
         zoom: 13 // starting zoom
     });
-    getUserImages();
     map.on('zoom', () => {
         let list = document.getElementsByClassName('map-markers')
         for (let item of list) {
@@ -47,13 +50,24 @@ function outputMap(lat, lng) {
         }
     })
 }
+document.getElementById('file').addEventListener("change", e => {
+    var fileList = document.getElementById('file').files;
+    var preview = document.getElementById('image-preview');
+    preview.src = URL.createObjectURL(fileList[0]);
 
+    preview.onload = () => {
+      URL.revokeObjectURL(preview.src)
+      console.log()
+      preview.style.width =  '100px';
+    }
+  });
 function postData() {
     data.time = Date.now();
     data.date = new Date().toISOString().slice(0, 16);
     data.title = document.getElementById('title').value;
     data.description = document.getElementById('description').value;
-    fetch('/imageData', {
+    console.log(data)
+    /*fetch('/imageData', {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
@@ -63,7 +77,7 @@ function postData() {
         redirect: 'follow', // manual, *follow, error
         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
         body: JSON.stringify(data)
-    });
+    });*/
 }
 
 
@@ -75,15 +89,23 @@ var geojson = {
 
     ]
 };
-
-function getUserImages() {
+if(window.location.href.split('/')[3] !== 'home'){
+    getUserImages(window.location.href.split('/')[3]);
+}
+function getUserImages(dir) {
+    
     geojson = {
         'type': 'FeatureCollection',
         'features': [
 
         ]
     };
-    let userID = document.getElementById('userID').innerHTML;
+    let userID = document.getElementById('dir').value;
+    if (dir){
+        userID = window.location.href.split('/')[3];
+        data.user = window.location.href.split('/')[3];
+        document.getElementById('dir').value = window.location.href.split('/')[3];
+    }
     fetch(`/images/${userID}/`)
         .then(res => res.json())
         .then(data => {
@@ -144,9 +166,7 @@ function addMarkers() {
                 el.style.borderRadius = '50%';
                 open = false;
             }
-            el.on('dragend', (el) => {
-                console.log(el);
-            })
+
         });
         let allMapMarkers = []
         // add marker to map
