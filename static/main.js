@@ -17,7 +17,9 @@ data = {
     time: 0,
     date: 0,
     user: 'Felix',
-    id: 0
+    id: 0,
+    title: 0,
+    description: 0
 }
 
 function outputMap(lat, lng) {
@@ -49,8 +51,8 @@ function outputMap(lat, lng) {
 function postData() {
     data.time = Date.now();
     data.date = new Date().toISOString().slice(0, 16);
-    let file = document.getElementById('file').files;
-    console.log(file)
+    data.title = document.getElementById('title').value;
+    data.description = document.getElementById('description').value;
     fetch('/imageData', {
         method: 'POST',
         mode: 'cors',
@@ -87,24 +89,25 @@ function getUserImages() {
         .then(data => {
             data.forEach(el => {
                 //REDO DATE
-
-                let imageDataArray = el.split('-')
-                let date = `${imageDataArray[0]}-${imageDataArray[1]}-${imageDataArray[2].split('T')[0]} at ${imageDataArray[2].split('T')[1]}:${imageDataArray[3]}`
-                let location = [imageDataArray[5], imageDataArray[6].split('.png')[0]]
+                let dateData = el.date.split('-')
+                let date = `${dateData[0]}-${dateData[1]}-${dateData[2].split('T')[0]} at ${dateData[2].split('T')[1]}:${dateData[3]}`
+                let location = [el.location.split('-')[0], el.location.split('-')[1]]
                 let newGeoJSONData = {
                     'type': 'Feature',
                     'properties': {
                         'message': `Date: ${date} GMT+0.`,
-                        'img': `/images/${userID}/${el}`,
-                        'location': location
+                        'img': el.id,
+                        'location': location,
+                        'username': el.username,
+                        'title': el.title,
+                        'description': el.description
                     },
                     'geometry': {
                         'type': 'Point',
                         'coordinates': location
                     }
                 }
-                geojson.features.push(newGeoJSONData)
-
+                geojson.features.push(newGeoJSONData);
             })
             addMarkers();
         })
@@ -117,7 +120,7 @@ function addMarkers() {
         const el = document.createElement('div');
         el.className = 'map-markers'
         el.style.backgroundImage =
-            `url(${marker.properties.img})`
+            `url(/images/${marker.properties.username}/${marker.properties.img})`
         let location = marker.properties.location;
         let open = false;
         let zoom = map.getZoom();
@@ -141,8 +144,8 @@ function addMarkers() {
                 el.style.borderRadius = '50%';
                 open = false;
             }
-            el.on('dragend', () => {
-                console.log('DRAGGING')
+            el.on('dragend', (el) => {
+                console.log(el);
             })
         });
         let allMapMarkers = []
@@ -152,12 +155,20 @@ function addMarkers() {
         })
             .setLngLat(location)
             .setPopup(new mapboxgl.Popup({
-                    offset: 25
+                    offset: 50
                 }) // add popups
-            .setHTML('<p>' + marker.properties.message + '</p><p>' + 'Yes' + '</p>'))
+            .setHTML(`
+            <p>${marker.properties.title}</p>
+            <p>${marker.properties.description}</p>
+            `))
             .addTo(map));
             allMapMarkers[0].on('dragend', (el) => {
-                console.log(el.target._lngLat)
+                let url = el.target._element.style.backgroundImage.split('/')
+                console.log(url[3].slice(0,-2))
+                fetch(`/move/${url[2]}/${url[3].slice(0,-2)}/${el.target._lngLat.lng}-${el.target._lngLat.lat}`)
+                .then(data => {
+                    console.log(data)
+                })
             })
 
     });

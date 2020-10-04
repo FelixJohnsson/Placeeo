@@ -29,9 +29,10 @@ body {
     padding: 20px;
 }
 .mapboxgl-popup-content {
-    background-color: rgba(236, 236, 236, 0.829);
+    background-color: rgba(236, 236, 236, 0.52);
     height: 200px;
-    width: 200px;
+    width: 300px;
+    padding: 20px;
 }
 
 
