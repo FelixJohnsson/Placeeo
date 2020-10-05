@@ -6,13 +6,14 @@
   <meta http-equiv='X-UA-Compatible' content='IE=edge'>
   <title>Page Title</title>
   <meta name='viewport' content='width=device-width, initial-scale=1'>
-  <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+  <link rel='stylesheet' type='text/css' media='screen' href='/main.css'>
 </head>
 
 <body>
   <div id="control-panel">
     <p>Selected Dir: <input id="dir" placeholder="Dir name" type="text">
       <button onclick="redirectDir()">Find</button>
+    <form action="/image-upload" method="post" enctype="multipart/form-data">
       <div>
         <label for="file">Choose file to upload</label>
         <input type="file" id="file" name="file" multiple id="file">
@@ -20,7 +21,9 @@
       <div>
         <button onclick="postData()">Submit</button>
       </div>
+    </form>
     <img id="image-preview">
+    <hr>
     <input id="title" placeholder="Title" type="text">
     <input id="description" placeholder="Description" type="text">
   </div>
@@ -28,6 +31,6 @@
   <div id='map'></div>
 </body>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
-<script src='main.js'></script>
+<script src='/edit.js'></script>
 
 </html>

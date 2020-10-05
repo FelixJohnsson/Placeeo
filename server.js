@@ -20,8 +20,11 @@ app.use(fileUpload({
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname + '/static/index.html'))
 })
-app.get('/:dir', (req, res) => {
-  res.sendFile(path.join(__dirname + '/static/index.html'))
+app.get('/edit/:dir', (req, res) => {
+  res.sendFile(path.join(__dirname + '/static/edit.html'))
+})
+app.get('/view/:id', (req, res) => {
+  res.sendFile(path.join(__dirname + '/static/view.html'))
 })
 
 app.listen(port, () => {
@@ -37,6 +40,8 @@ app.post('/imageData', function (req, res) {
   imageData.date = imageData.date.replace(':', '-');
   title = req.body.title;
   description = req.body.description;
+  height = req.body.height;
+  width = req.body.width;
   handleFolders(req.body.user);
 });
 
@@ -60,7 +65,9 @@ users.forEach(el => {
       location: `${imageData.location[0]}-${imageData.location[1]}`,
       id: `${imageData.date}-${imageData.time}-${imageData.location[0]}-${imageData.location[1]}.png`,
       title: imageData.title,
-      description:imageData.description
+      description:imageData.description,
+      height: imageData.height,
+      width: imageData.width
     };
     fs.readFile(`${__dirname}\\static\\images\\${username}\\${username}.txt`, (err, data) => {
       if (err){
