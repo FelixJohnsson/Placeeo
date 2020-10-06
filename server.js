@@ -24,7 +24,8 @@ app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname + '/static/view.html'))
 })
 app.get('/edit/:dir', (req, res) => {
-  res.sendFile(path.join(__dirname + '/static/edit.html'))
+  //CHECK IF EMPTY
+  res.status(200).sendFile(path.join(__dirname + '/static/edit.html'))
 })
 app.get('/view/:id', (req, res) => {
   res.sendFile(path.join(__dirname + '/static/view.html'))
@@ -36,6 +37,7 @@ app.listen(port, () => {
 let username;
 let imageData;
 app.post('/imageData', function (req, res) {
+  //FIND FOLDER
   imageData = req.body;
   console.log(imageData)
   imageData.id = uuidv4();
@@ -117,11 +119,13 @@ app.get('/images/:username/', (req, res) => {
   files.forEach(el => {
     if (el === req.params.username) {
       fs.readFile(`${__dirname}\\static\\images\\${req.params.username}\\${req.params.username}.txt`, (err, data) => {
-        if(err)console.log(err)
+        if(err) console.log('Error')
         else{
           res.send(JSON.parse(data))
         }
       })
+      } else {
+        res.send({ 'status': 'Empty' })
       }
     })
 })

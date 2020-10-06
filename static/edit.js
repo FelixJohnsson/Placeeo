@@ -1,3 +1,5 @@
+    //FETCH SPECIFIC FOLDER ONLY - 157
+
 let map;
 
 const options = {
@@ -50,6 +52,7 @@ function outputMap(lat, lng) {
             item.style.backgroundSize = 'cover';
         }
     })
+    let marker;
     map.on('click', (e) => {
         if (!exist){
             var el = document.createElement('div');
@@ -59,11 +62,13 @@ function outputMap(lat, lng) {
             el.style.height = '20px';
             el.style.borderRadius = '50%';
             el.style.border = 'solid white 3px'
-            new mapboxgl.Marker(el, {
+            marker = new mapboxgl.Marker(el, {
                 draggable: true
             })
             .setLngLat([e.lngLat.lng, e.lngLat.lat])
             .addTo(map);
+        } else {
+            marker.setLngLat([e.lngLat.lng, e.lngLat.lat])
         }
         exist = true;
         placeholder = [e.lngLat.lng, e.lngLat.lat];
@@ -108,6 +113,7 @@ function postData() {
     data.date = new Date().toISOString().slice(0, 16);
     data.title = document.getElementById('title').value;
     data.description = document.getElementById('description').value;
+    
     fetch('/imageData', {
         method: 'POST',
         mode: 'cors',
@@ -134,7 +140,6 @@ var geojson = {
 getUserImages(window.location.href.split('/')[4]);
 
 function getUserImages(dir) {
-
     geojson = {
         'type': 'FeatureCollection',
         'features': [
@@ -147,9 +152,14 @@ function getUserImages(dir) {
         data.user = window.location.href.split('/')[4];
         document.getElementById('dir').value = window.location.href.split('/')[4];
     }
+    console.log('GETTING IMAGES ' + userID)
     fetch(`/images/${userID}/`)
         .then(res => res.json())
         .then(data => {
+            if (data.status === 'Empty'){
+                document.getElementById('status').innerHTML = 'This dir is empty, claim it!'
+                return;
+            }
             data.forEach(el => {
                 let dateData = el.date.split('-')
                 let date = `${dateData[0]}-${dateData[1]}-${dateData[2].split('T')[0]} at ${dateData[2].split('T')[1]}:${dateData[3]}`
@@ -173,6 +183,7 @@ function getUserImages(dir) {
                 }
                 geojson.features.push(newGeoJSONData);
             })
+            document.getElementById('status').innerHTML = 'This dir has data.'
             addMarkers();
         })
 }
