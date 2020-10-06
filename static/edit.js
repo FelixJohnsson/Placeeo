@@ -27,10 +27,10 @@ data = {
     height: 0,
     width: 0
 }
-
+let exist = false;
+let placeholder = null;
 function outputMap(lat, lng) {
-    data.location = [lng, lat]
-    console.log(lng, lat)
+    
     atLocation = [lng, lat]
     mapboxgl.accessToken = 'pk.eyJ1IjoiZmVsaXhqb2huc3NvbiIsImEiOiJjanh0ZHIwd3kwcjhjM2Rvb2M3ZnVyMW5kIn0.Mdf_WJH-4npMZh3HNu-6wQ';
     map = new mapboxgl.Map({
@@ -44,12 +44,30 @@ function outputMap(lat, lng) {
         let list = document.getElementsByClassName('map-markers')
         for (let item of list) {
             let zoom = map.getZoom();
-            let size = zoom * 8; 
-            item.style.width = size +'px';
-            item.style.height = size+'px';
+            let size = zoom * 8;
+            item.style.width = size + 'px';
+            item.style.height = size + 'px';
             item.style.backgroundSize = 'cover';
         }
     })
+    map.on('click', (e) => {
+        if (!exist){
+            var el = document.createElement('div');
+            el.className = 'marker';
+            el.style.background = '#297373'
+            el.style.width = '20px';
+            el.style.height = '20px';
+            el.style.borderRadius = '50%';
+            el.style.border = 'solid white 3px'
+            new mapboxgl.Marker(el, {
+                draggable: true
+            })
+            .setLngLat([e.lngLat.lng, e.lngLat.lat])
+            .addTo(map);
+        }
+        exist = true;
+        placeholder = [e.lngLat.lng, e.lngLat.lat];
+    });
     /*map.on('load', ()=> {
         rotateCamera(0)
         function rotateCamera(timestamp) {
@@ -82,11 +100,14 @@ document.getElementById('file').addEventListener("change", e => {
 });
 
 function postData() {
+    if (placeholder === null){
+        data.location = atLocation;
+    }
+    data.location = placeholder;
     data.time = Date.now();
     data.date = new Date().toISOString().slice(0, 16);
     data.title = document.getElementById('title').value;
     data.description = document.getElementById('description').value;
-    console.log(data)
     fetch('/imageData', {
         method: 'POST',
         mode: 'cors',
@@ -130,8 +151,6 @@ function getUserImages(dir) {
         .then(res => res.json())
         .then(data => {
             data.forEach(el => {
-                console.log(el)
-                //REDO DATE
                 let dateData = el.date.split('-')
                 let date = `${dateData[0]}-${dateData[1]}-${dateData[2].split('T')[0]} at ${dateData[2].split('T')[1]}:${dateData[3]}`
                 let location = [el.location.split('-')[0], el.location.split('-')[1]]
@@ -165,7 +184,7 @@ function addMarkers() {
     geojson.features.forEach((marker) => {
         const el = document.createElement('div');
         el.className = 'map-markers'
-        
+
         el.style.backgroundImage =
             `url(/images/${marker.properties.username}/${marker.properties.img})`
         el.style.backgroundSize = 'cover';

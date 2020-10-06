@@ -17,8 +17,11 @@ app.use(fileUpload({
   createParentPath: true
 }));
 
+app.get('/', (req, res) => {
+  res.redirect('/preview');
+})
 app.get('/home', (req, res) => {
-  res.sendFile(path.join(__dirname + '/static/index.html'))
+  res.sendFile(path.join(__dirname + '/static/view.html'))
 })
 app.get('/edit/:dir', (req, res) => {
   res.sendFile(path.join(__dirname + '/static/edit.html'))
