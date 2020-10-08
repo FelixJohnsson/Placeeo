@@ -18,7 +18,7 @@ app.use(fileUpload({
 }));
 
 app.get('/', (req, res) => {
-  res.redirect('/preview');
+  res.redirect('/home');
 })
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname + '/static/view.html'))
@@ -114,20 +114,24 @@ function writeFile(fileDir, data) {
 
 
 app.get('/images/:username/', (req, res) => {
-
+  
   const files = fs.readdirSync(`${__dirname}\\static\\images\\`)
+  let found = false;
   files.forEach(el => {
     if (el === req.params.username) {
+      found = true;
+      console.log(found)
       fs.readFile(`${__dirname}\\static\\images\\${req.params.username}\\${req.params.username}.txt`, (err, data) => {
         if(err) console.log('Error')
         else{
           res.send(JSON.parse(data))
         }
       })
-      } else {
-        res.send({ 'status': 'Empty' })
-      }
+      } 
     })
+    if(!found) {
+      res.send({ 'status': 'Empty' })
+    }
 })
 app.get('/images/:username/:id', (req, res) => {
   res.sendFile(`${__dirname}\\static\\images\\${req.params.username}\\${req.params.id}`)
@@ -151,4 +155,12 @@ app.get('/move/:username/:id/:newCoordinates', (req, res) => {
     }
   })
   res.sendStatus(200)
+})
+
+app.post('/claimDir', (req, res) => {
+  handleFolders(req.body.dir);
+  
+  fs.writeFile(`${__dirname}\\static\\images\\${req.body.dir}\\${req.body.dir}.txt`, JSON.stringify([{password:req.body.password}]), function (err) {
+    if (err) throw err;
+  });
 })

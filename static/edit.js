@@ -105,10 +105,10 @@ document.getElementById('file').addEventListener("change", e => {
 });
 
 function postData() {
+    data.location = placeholder;
     if (placeholder === null){
         data.location = atLocation;
     }
-    data.location = placeholder;
     data.time = Date.now();
     data.date = new Date().toISOString().slice(0, 16);
     data.title = document.getElementById('title').value;
@@ -152,15 +152,21 @@ function getUserImages(dir) {
         data.user = window.location.href.split('/')[4];
         document.getElementById('dir').value = window.location.href.split('/')[4];
     }
-    console.log('GETTING IMAGES ' + userID)
     fetch(`/images/${userID}/`)
         .then(res => res.json())
         .then(data => {
+            console.log(data)
             if (data.status === 'Empty'){
-                document.getElementById('status').innerHTML = 'This dir is empty, claim it!'
+                document.getElementById('status').innerHTML = 'This dir is empty, choose a password: <input type="password" placeholder="Password" id="dir-password"> <button onclick="claimDir()">claim it!</button>'
                 return;
             }
+            
             data.forEach(el => {
+                if (el.password){
+                    let password = el.password;
+                    console.log(password)
+                } 
+                if (el.date === undefined) return;
                 let dateData = el.date.split('-')
                 let date = `${dateData[0]}-${dateData[1]}-${dateData[2].split('T')[0]} at ${dateData[2].split('T')[1]}:${dateData[3]}`
                 let location = [el.location.split('-')[0], el.location.split('-')[1]]
@@ -208,7 +214,10 @@ function addMarkers() {
             newWidth -= (marker.properties.height - 500) * widthDim;
         }
         el.id = `${newHeight}-${newWidth}`;
-
+        const p = document.createElement('P');
+        let t = document.createTextNode(marker.properties.title);
+        p.appendChild(t)
+        p.classList.add('marker-text');
         el.addEventListener('click', () => {
             if (open) {
                 el.style.width = newWidth + 'px';
@@ -218,8 +227,11 @@ function addMarkers() {
                 el.style.opacity = '100%';
                 el.style.borderRadius = '0%';
                 el.classList.add('marker-active');
+
+                el.appendChild(p)
                 open = false;
             } else if (!open) {
+                el.removeChild(p)
                 el.classList.remove('marker-active');
                 el.style.width = '106px';
                 el.style.height = '106px';
@@ -247,5 +259,25 @@ function addMarkers() {
                 })
         })
 
+    });
+}
+
+function claimDir(){
+    console.log('CLAIMING DIR')
+    reqBody = {
+        dir: window.location.href.split('/')[4],
+        password: document.getElementById('dir-password').value
+    }
+
+    fetch(`/claimDir`, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(reqBody)
     });
 }

@@ -10,6 +10,7 @@ label {
 
 body {
     background-color: rgb(195, 169, 169);
+    font-family: 'Poppins', sans-serif;
 }
 
 #map {
@@ -53,11 +54,19 @@ body {
     z-index: 2;
 }
 .marker-active:hover{
-    filter: grayscale(80%) blur(2px);
+    filter: grayscale(50%);
 }
 
 #image-preview{
     position: absolute;
     top: 40px;
     left: 400px;
+}
+
+.marker-text{
+    color: white;
+    filter: blur(-2px);
+    font-size: 15px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.719);
 }
