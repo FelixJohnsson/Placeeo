@@ -29,6 +29,8 @@ data = {
 }
 let zoomLevel = 13;
 function outputMap(lat, lng) {
+
+
     data.location = [lng, lat]
     console.log(lng, lat)
     atLocation = [lng, lat]
@@ -88,7 +90,6 @@ if (window.location.href.split('/')[3] !== 'home') {
 }
 
 function getUserImages() {
-
     geojson = {
         'type': 'FeatureCollection',
         'features': [
@@ -99,8 +100,6 @@ function getUserImages() {
         .then(res => res.json())
         .then(data => {
             data.forEach(el => {
-                console.log(el)
-                //REDO DATE
                 let dateData = el.date.split('-')
                 let date = `${dateData[0]}-${dateData[1]}-${dateData[2].split('T')[0]} at ${dateData[2].split('T')[1]}:${dateData[3]}`
                 let location = [el.location.split('-')[0], el.location.split('-')[1]]

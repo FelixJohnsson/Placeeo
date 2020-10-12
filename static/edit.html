@@ -15,19 +15,23 @@
     <p>Selected Dir: <input id="dir" placeholder="Dir name" type="text">
       <button onclick="redirectDir()">Find</button>
       <p id="status"></p>
-    <form action="/image-upload" method="post" enctype="multipart/form-data">
+      <p id="password-protected" style="display: none;">This dir is password protected.</p>
+      <p id="not-password-protected" style="display: none;">This dir is password protected.</p>
+      <input id="password" type="password" placeholder="Password">
+
+      <button onclick="submitPassword()" id="submit-password-button" style="display: none;">Submit</button>
+
       <div>
         <label for="file">Choose file to upload</label>
         <input type="file" id="file" name="file" multiple id="file">
       </div>
       <div>
-        <button onclick="postData()">Submit</button>
+        <button onclick="uploadImageAndData()">Submit</button>
+        <p id="dir-protected" style="display: none;">This dir is password protected. Enter password above.</p>
       </div>
-    </form>
     <img id="image-preview">
     <hr>
     <input id="title" placeholder="Title" type="text">
-    <input id="description" placeholder="Description" type="text">
   </div>
   
   <div id='map'></div>

@@ -1,5 +1,3 @@
-    //FETCH SPECIFIC FOLDER ONLY - 157
-
 let map;
 
 const options = {
@@ -31,8 +29,9 @@ data = {
 }
 let exist = false;
 let placeholder = null;
+
 function outputMap(lat, lng) {
-    
+
     atLocation = [lng, lat]
     mapboxgl.accessToken = 'pk.eyJ1IjoiZmVsaXhqb2huc3NvbiIsImEiOiJjanh0ZHIwd3kwcjhjM2Rvb2M3ZnVyMW5kIn0.Mdf_WJH-4npMZh3HNu-6wQ';
     map = new mapboxgl.Map({
@@ -54,8 +53,8 @@ function outputMap(lat, lng) {
     })
     let marker;
     map.on('click', (e) => {
-        if (!exist){
-            var el = document.createElement('div');
+        if (!exist) {
+            let el = document.createElement('div');
             el.className = 'marker';
             el.style.background = '#297373'
             el.style.width = '20px';
@@ -63,10 +62,10 @@ function outputMap(lat, lng) {
             el.style.borderRadius = '50%';
             el.style.border = 'solid white 3px'
             marker = new mapboxgl.Marker(el, {
-                draggable: true
-            })
-            .setLngLat([e.lngLat.lng, e.lngLat.lat])
-            .addTo(map);
+                    draggable: true
+                })
+                .setLngLat([e.lngLat.lng, e.lngLat.lat])
+                .addTo(map);
         } else {
             marker.setLngLat([e.lngLat.lng, e.lngLat.lat])
         }
@@ -86,12 +85,12 @@ function outputMap(lat, lng) {
 
 }
 document.getElementById('file').addEventListener("change", e => {
-    var fileList = document.getElementById('file').files;
-    var preview = document.getElementById('image-preview');
+    let fileList = document.getElementById('file').files;
+    let preview = document.getElementById('image-preview');
     preview.src = URL.createObjectURL(fileList[0]);
 
 
-    var image = new Image();
+    let image = new Image();
     image.src = preview.src;
     image.onload = function () {
         data.width = image.naturalWidth;
@@ -100,42 +99,50 @@ document.getElementById('file').addEventListener("change", e => {
 
     preview.onload = () => {
         URL.revokeObjectURL(preview.src)
+        preview.height = '300px';
     }
 
 });
 
-function postData() {
-    data.location = placeholder;
-    if (placeholder === null){
-        data.location = atLocation;
-    }
-    data.time = Date.now();
-    data.date = new Date().toISOString().slice(0, 16);
-    data.title = document.getElementById('title').value;
-    data.description = document.getElementById('description').value;
-    
-    fetch('/imageData', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(data)
-    });
-}
-
-
 let atLocation;
 let markers;
-var geojson = {
+let geojson = {
     'type': 'FeatureCollection',
     'features': [
 
     ]
 };
+
+function submitPassword() {
+    let password = document.getElementById('password').value;
+    checkPassword(password);
+}
+
+function checkPassword(password) {
+    fetch(`/checkPassword`, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify({
+                password: password
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data) {
+                document.getElementById('correct-password').style.display = 'block';
+                document.getElementById('incorrect-password').style.display = 'none';
+            } else {
+                document.getElementById('incorrect-password').style.display = 'block';
+                document.getElementById('correct-password').style.display = 'none';
+            }
+        })
+}
 
 getUserImages(window.location.href.split('/')[4]);
 
@@ -155,17 +162,14 @@ function getUserImages(dir) {
     fetch(`/images/${userID}/`)
         .then(res => res.json())
         .then(data => {
-            console.log(data)
-            if (data.status === 'Empty'){
-                document.getElementById('status').innerHTML = 'This dir is empty, choose a password: <input type="password" placeholder="Password" id="dir-password"> <button onclick="claimDir()">claim it!</button>'
+            if (data.status === 'Empty') {
+                document.getElementById('status').innerHTML = 'This dir is empty'
+                document.getElementById('password').style.display = 'none';
                 return;
             }
-            
+            document.getElementById('password').style.display = 'block';
+            document.getElementById('submit-password-button').style.display = 'block';
             data.forEach(el => {
-                if (el.password){
-                    let password = el.password;
-                    console.log(password)
-                } 
                 if (el.date === undefined) return;
                 let dateData = el.date.split('-')
                 let date = `${dateData[0]}-${dateData[1]}-${dateData[2].split('T')[0]} at ${dateData[2].split('T')[1]}:${dateData[3]}`
@@ -174,7 +178,7 @@ function getUserImages(dir) {
                     'type': 'Feature',
                     'properties': {
                         'message': `Date: ${date} GMT+0.`,
-                        'img': el.id,
+                        'img': el.dir,
                         'location': location,
                         'username': el.username,
                         'title': el.title,
@@ -252,17 +256,13 @@ function addMarkers() {
             .addTo(map));
         allMapMarkers[0].on('dragend', (el) => {
             let url = el.target._element.style.backgroundImage.split('/')
-            console.log(url[3].slice(0, -2))
             fetch(`/move/${url[2]}/${url[3].slice(0,-2)}/${el.target._lngLat.lng}-${el.target._lngLat.lat}`)
-                .then(data => {
-                    console.log(data)
-                })
         })
 
     });
 }
 
-function claimDir(){
+function claimDir() {
     console.log('CLAIMING DIR')
     reqBody = {
         dir: window.location.href.split('/')[4],
@@ -281,3 +281,112 @@ function claimDir(){
         body: JSON.stringify(reqBody)
     });
 }
+
+const inputElement = document.getElementById("file");
+
+
+document.getElementById('file').addEventListener('change', event => {
+    preview(event);
+})
+const preview = event => {
+    files = event.target.files
+    let preview = document.getElementById('image-preview');
+    preview.src = URL.createObjectURL(files[0]);
+    preview.onload = () => {
+        URL.revokeObjectURL(preview.src)
+        preview.style.height = '106px';
+        preview.style.backgroundSize = `cover`;
+        preview.style.zIndex = '1';
+        preview.style.opacity = '100%';
+        preview.style.borderRadius = '50%';
+    }
+}
+function uploadImageAndData(){
+
+    if(!password && password !== null){
+        document.getElementById('dir-protected').style.display = 'block'
+        return;
+    }
+    const formData = new FormData()
+    formData.append('image', files[0])
+
+imageData = {
+    username: window.location.href.split('/')[4],
+    location: placeholder,
+    time: Date.now(),
+    date: new Date().toISOString().slice(0, 16),
+    title: document.getElementById('title').value,
+    password: password
+}
+if (placeholder === null) imageData.location = atLocation;
+fetch('/upload-image-data', {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(imageData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+    })
+    .catch(error => {
+        console.error(error)
+    })
+fetch('/upload-image-file', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        map.remove();
+        outputMap(imageData.location[1], imageData.location[0]);
+        getUserImages(window.location.href.split('/')[4]);
+    })
+    .catch(error => {
+        console.error(error)
+    })
+    
+}
+
+let password = null;
+function submitPassword(){
+    fetch(`/check-password/${window.location.href.split('/')[4]}/${password = document.getElementById('password').value}`, {
+        method:'GET'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.msg === 'PASSWORD IS NOT CORRECT'){
+            document.getElementById('password').style.borderColor = 'red';
+        }
+        if(data.msg === 'PASSWORD IS CORRECT'){
+            document.getElementById('password').style.borderColor = 'green';
+            password = true;
+        }
+    })
+}
+
+function passwordHandler(){
+    fetch(`/check-password/${window.location.href.split('/')[4]}`, {
+        method:'GET'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.msg === 'PASSWORD PROTECTED'){
+            document.getElementById('password-protected').style.display = 'block';
+            document.getElementById('not-password-protected').style.display = 'none';
+            document.getElementById('dir-protected').style.display = 'none'
+        }
+        if (data.msg === 'PASSWORD PROTECTED'){
+            document.getElementById('password-protected').style.display = 'none';
+            document.getElementById('not-password-protected').style.display = 'block';
+            document.getElementById('dir-protected').style.display = 'none'
+        }
+    })
+}
+
+passwordHandler();
