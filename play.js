@@ -2,6 +2,14 @@ let username;
 let imageData;
 app.post('/imageData', function (req, res) {
   //FIND FOLDER
+  data.location = placeholder;
+  if (placeholder === null){
+      data.location = atLocation;
+  }
+  data.time = Date.now();
+  data.date = new Date().toISOString().slice(0, 16);
+  data.title = document.getElementById('title').value;
+  
   imageData = req.body;
   console.log(imageData)
   imageData.id = uuidv4();

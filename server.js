@@ -6,9 +6,6 @@ const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const fs = require('fs');
-const {
-  response
-} = require('express');
 
 app.use('/static', express.static(path.join(__dirname, 'static')))
 app.use(cors())
@@ -29,11 +26,13 @@ app.use(bodyParser.urlencoded({
   extended: true
 }))
 
+
+
 app.get('/', (req, res) => {
-  res.redirect('/home');
+  res.redirect('/edit/MyAssets');
 })
 app.get('/home', (req, res) => {
-  res.sendFile(path.join(__dirname + '/static/view.html'))
+  res.redirect('/edit/MyAssets')
 })
 app.get('/edit/:dir', (req, res) => {
   res.status(200).sendFile(path.join(__dirname + '/static/edit.html'))
@@ -57,13 +56,16 @@ app.post('/upload-image-file', (req, res) => {
         else {
           JSON.parse(data).forEach(el => {
             if (el.password !== undefined) {
-              if (el.password !== newImageData.password) {
+              if (el.password  === newImageData.password) {
                 res.send({
-                  "msg": "PASSWORD IS NOT CORRECT"
+                  "msg": "PASSWORD IS CORRECT"
                 })
                 return;
               }
             }
+          })
+          res.send({
+            "msg": "PASSWORD IS NOT CORRECT"
           })
         }
       })
@@ -100,8 +102,10 @@ function textFileHandler(newImageData) {
         title: newImageData.title,
         description: newImageData.description,
         height: newImageData.height,
-        width: newImageData.width
+        width: newImageData.width,
+        status: newImageData.status
       };
+
       fs.readFile(`${__dirname}\\static\\images\\${newImageData.username}\\${newImageData.username}.txt`, (err, data) => {
         if (err) {
           //IF NEW USER, CREATE EMPTY ARRAY WITH NEW IMAGE FILE 
@@ -144,28 +148,40 @@ app.get('/images/:username/', (req, res) => {
     }
   })
   if (!found) {
+    console.log('I did not find the: ' + username + ' directory.')
+    fs.mkdir(path.join(`${__dirname}\\static\\images\\${username}`), (err) => { 
+      if (err) { 
+          return console.error(err); 
+      } 
+      console.log('Directory created successfully!'); 
+      writeFile(`${__dirname}\\static\\images\\${username}\\${username}.txt`, JSON.stringify([{name:username}]));
+  }); 
     res.send({
       'status': 'Empty'
     })
   }
 })
 //---------------------------------MOVING MARKERS------------------------------------
-app.get('/move/:username/:dir/:newCoordinates', (req, res) => {
+app.get('/move/:username/:dir/:newCoordinates/:password', (req, res) => {
+  console.log('MOVE')
   fs.readFile(`${__dirname}\\static\\images\\${req.params.username}\\${req.params.username}.txt`, (err, data) => {
-    if (err) console.log(err)
+    if (err) console.log("Can't find that text file.")
     else {
-      let array = JSON.parse(data);
+      let array = JSON.parse(data)
       array.forEach(el => {
-        if (el.dir === req.params.dir) {
-          el.location = req.params.newCoordinates;
-          fs.writeFile(`${__dirname}\\static\\images\\${req.params.username}\\${req.params.username}.txt`, JSON.stringify(array), function (err) {
-            if (err) throw err;
-          });
+          if (el.password === req.params.password || el.password === undefined) {
+            array.forEach(el => {
+              if (el.dir === req.params.dir) {
+                el.location = req.params.newCoordinates;
+                fs.writeFile(`${__dirname}\\static\\images\\${req.params.username}\\${req.params.username}.txt`, JSON.stringify(array), function (err) {
+                  if (err) throw err;
+                });
+              }
+            })
         }
       })
     }
   })
-  res.sendStatus(200)
 })
 
 function writeFile(fileDir, data) {
@@ -180,10 +196,14 @@ function writeFile(fileDir, data) {
 app.get('/check-password/:dir', (req, res) => {
   const files = fs.readdirSync(`${__dirname}\\static\\images\\`)
   let found = false;
+  
   files.forEach(el => {
     if (el === req.params.dir) {
       fs.readFile(`${__dirname}\\static\\images\\${req.params.dir}\\${req.params.dir}.txt`, (err, data) => {
-        if (err) console.log("Can't find that text file.")
+        if (err) {
+          res.send({ "msg": 'NOT PASSWORD PROTECTED'})
+          return;
+        }
         else {
           JSON.parse(data).forEach(el => {
             if (el.password !== undefined) {
@@ -192,13 +212,42 @@ app.get('/check-password/:dir', (req, res) => {
             }
           })
           if (found) {
-            res.send({
-              "msg": 'PASSWORD PROTECTED'
-            })
+            res.send({ "msg": 'PASSWORD PROTECTED'})
+            return;
           } else {
-            res.send({
-              "msg": 'NOT PASSWORD PROTECTED'
-            })
+            res.send({ "msg": 'NOT PASSWORD PROTECTED'})
+            return;
+          }
+        }
+
+      })
+    }
+  })
+})
+
+app.get('/control-password/:dir/:password', (req, res) => {
+  console.log(req.params)
+  const files = fs.readdirSync(`${__dirname}\\static\\images\\`)
+  files.forEach(el => {
+    if (el === req.params.dir) {
+      fs.readFile(`${__dirname}\\static\\images\\${req.params.dir}\\${req.params.dir}.txt`, (err, data) => {
+        if (err) res.send({"msg": "CANT FIND THAT TEXT FILE"})
+        else {
+          let found = null;
+          JSON.parse(data).forEach(el => {
+            if (data.password !== undefined) {
+              found = data.password;
+              return;
+            }
+          })
+          if (found === null){
+            res.send({"msg": "PASSWORD IS CORRECT"})
+          } else {
+            if (data.password === req.params.password){
+              res.send({"msg": "PASSWORD IS CORRECT"});
+            } else {
+              res.send({"msg": "PASSWORD IS NOT CORRECT"});
+            }
           }
         }
       })
@@ -206,37 +255,28 @@ app.get('/check-password/:dir', (req, res) => {
   })
 })
 
-app.get('/check-password/:dir/:password', (req, res) => {
+app.post('/set-password', (req, res) => {
   const files = fs.readdirSync(`${__dirname}\\static\\images\\`)
+  
   files.forEach(el => {
-    if (el === req.params.dir) {
-      fs.readFile(`${__dirname}\\static\\images\\${req.params.dir}\\${req.params.dir}.txt`, (err, data) => {
-        if (err) console.log("Can't find that text file.")
+    if (el === req.body.dir) {
+      
+      fs.readFile(`${__dirname}\\static\\images\\${req.body.dir}\\${req.body.dir}.txt`, (err, data) => {
+        if (err) {res.send({"msg": "CANT FIND THAT TEXT FILE"}); return;}
         else {
-          JSON.parse(data).forEach(el => {
-            if (el.password !== undefined) {
-              if (el.password === req.params.password) {
-                res.send({
-                  "msg": "PASSWORD IS CORRECT"
-                })
-              } else {
-                res.send({
-                  "msg": "PASSWORD IS NOT CORRECT"
-                })
-              }
-            }
-          })
+          let parsedData = JSON.parse(data)
+          parsedData.push({password : req.body.password})
+          console.log(parsedData)
+          writeFile(`${__dirname}\\static\\images\\${req.body.dir}\\${req.body.dir}.txt`, JSON.stringify(parsedData));
         }
       })
     }
   })
+  res.send({"msg":"PASSWORD SET"})
 })
 
 
-
-
-
-
+//-----------------------------------------APP LISTEN---------------------------------------//
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })

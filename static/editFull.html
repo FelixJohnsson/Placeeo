@@ -4,14 +4,13 @@
 <head>
   <meta charset='utf-8'>
   <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-  <title>Placeeo</title>
+  <title>Page Title</title>
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <link rel='stylesheet' type='text/css' media='screen' href='/main.css'>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <img src="\logo.png" id="logo">
   <div id="control-panel">
     <p>Selected Dir: <input id="dir" placeholder="Dir name" type="text">
       <button onclick="redirectDir()">Find</button>
@@ -20,8 +19,8 @@
       <p id="not-password-protected" style="display: none;">This dir is not password protected.</p>
       <input id="password" type="password" placeholder="Password">
 
-      <button onclick="checkPassword()" id="submit-password-button" style="display: none;">Submit</button>
-      <button onclick="setPasswordOnDir()" id="set-password-button" style="display: none;">Set password</button>
+      <button onclick="submitPassword()" id="submit-password-button" style="display: none;">Submit</button>
+      <button onclick="setPasswordOnDir()" id="set-password-button" style="display: block;">Set password</button>
 
       <div>
         <label for="file">Choose file to upload</label>
@@ -39,9 +38,6 @@
   <div id='map'></div>
 </body>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
-<script src='\./js/password.js'></script>
-<script src='\./js/upload.js'></script>
-<script src='\./js/markers.js'></script>
-<script src='\./js/loadMap.js'></script>
+<script src='/edit.js'></script>
 
 </html>

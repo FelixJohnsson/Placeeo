@@ -9,25 +9,50 @@ label {
 }
 
 body {
-    background-color: rgb(195, 169, 169);
+    background-color: rgb(255, 255, 255);
     font-family: 'Poppins', sans-serif;
 }
 
-#map {
-    height: 98vh;
-    width: 99vw;
+#logo{
     position: absolute;
-    top:10px;
+    top: 4px;
+    right: 14px;
+    height: 90px;
+    width: 150px;
+}
+
+#map {
+    height: 100vh;
+    width: 100vw;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
     z-index: -2;
     overflow: hidden;
+    top: -5px;
+    left:-5px;
 }
 #control-panel{
     background-color: rgba(0, 0, 0, 0.561);
     position: absolute;
     top:0px;
     left: 0px;
-    width: 350px;
+    width: 375px;
     padding: 20px;
+}
+@media only screen and (max-width: 500px) {
+    #control-panel{
+        background-color: rgba(0, 0, 0, 0.561);
+        position: absolute;
+        top:0px;
+        left: 0px;
+        width: 99vw;
+        padding: 0px;
+    }
+    #map{
+        width: 101vw; 
+        height: 100vh;
+    }
 }
 .mapboxgl-popup-content {
     background-color: rgba(0, 0, 0, 0.52);
@@ -41,13 +66,13 @@ body {
 
 .map-markers{
     opacity:80%;
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
     background-size: 100px;
     background-repeat: no-repeat;
     background-position: center;
     background-color: white;
-    border: solid rgb(175, 133, 133) 3px;
+    border: solid rgb(51, 51, 51) 3px;
     border-radius: 50%;
     cursor: pointer;
     position: absolute;
@@ -59,8 +84,18 @@ body {
 
 #image-preview{
     position: absolute;
-    top: 40px;
-    left: 400px;
+    top: 250px;
+    left: 300px;
+    opacity:80%;
+    width: 50px;
+    height: 50px;
+    background-size: 100px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: white;
+    z-Index: 1;
+    opacity: 100%;
+    border-radius: 50%;
 }
 
 .marker-text{
@@ -69,4 +104,17 @@ body {
     font-size: 15px;
     padding: 15px;
     background-color: rgba(0, 0, 0, 0.719);
+    transform: translate(-240px, 0px);
+    width: 210px;
 }
+
+.marker-text-status{
+    color: white;
+    filter: blur(-2px);
+    font-size: 15px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.719);
+    transform: translate(-170px, 0px);
+    width: 140px;
+}
+
